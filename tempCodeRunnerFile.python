@@ -1,0 +1,28 @@
+import requests
+import json
+from bs4 import BeautifulSoup
+
+# Wikipedia URL for the list of computer scientists
+wiki_url = "https://en.wikipedia.org/wiki/List_of_computer_scientists"
+
+# Make a request to the Wikipedia page
+response = requests.get(wiki_url)
+html_content = response.text
+
+# Use BeautifulSoup to parse the HTML
+soup = BeautifulSoup(html_content, "html.parser")
+
+# Find the section containing the alphabetical lists
+alphabetical_lists_section = soup.find("div", class_="mw-parser-output")
+
+# Extract names from links in the alphabetical lists
+names = [a.get_text() for a in alphabetical_lists_section.find_all("a") if a.get("href", "").startswith("/wiki/") and '(' not in a.get_text()]
+
+# Save the names in a JSON file
+output_data = {"computer_scientists": names}
+with open("computer_scientists_from_wikipedia.json", "w", encoding="utf-8") as json_file:
+    json.dump(output_data, json_file, ensure_ascii=False, indent=2)
+
+# Print the extracted names
+for name in names:
+    print(name)
